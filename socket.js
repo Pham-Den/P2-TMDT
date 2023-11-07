@@ -5,7 +5,13 @@ module.exports = {
   init: (httpServer) => {
     io = new socket.Server(httpServer, {
       cors: {
-        origin: ["http://localhost:3000", "http://localhost:3001"],
+        origin: [
+          "http://localhost:3000",
+          "http://localhost:3001",
+          "https://p2-tmdt-client-demo.web.app",
+        ],
+        allowedHeaders: ["tmdt-chat-header"],
+        methods: ["GET", "POST"],
         credentials: true,
       },
     });

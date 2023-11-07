@@ -47,18 +47,20 @@ app.use("/api/user", userRouter);
 
 app.use("/api/product", productRouter);
 
-app.use("/api/order", orderRouter); 
+app.use("/api/order", orderRouter);
 
 app.use("/api/message", messageRouter);
 
 //Connect Mongoose Database - lấy url từ .env
+mongoose.set("strictQuery", false);
+
 mongoose
   .connect(process.env.URL_MONGOOSE)
   .then(() => {
     console.log("Mongoose is connecting ...");
 
     //SERVER chạy port 5000
-    const PORT = process.env.PORT || 5000;
+    const PORT = process.env.PORT || 5050;
     const httpServer = http.createServer(app);
     httpServer.listen(PORT);
     // const server = app.listen(PORT, () => console.log("Server is running ..."));

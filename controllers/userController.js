@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../model/userModel");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 const userController = {
   ///////////////////////3. (Client) Chức năng xác thực tài khoản////////////////////
@@ -36,14 +36,14 @@ const userController = {
       }
 
       //2.email có tồn tại chưa
-      const userCurrent = await User.find({ email: dataRegister.email });
+      const userCurrent = await User.findOne({ email: dataRegister.email });
 
-      if (userCurrent.length > 0) {
+      if (userCurrent > 0) {
         return res.status(400).json({ message: "Email is exist!" });
       }
 
       //3.băm password bằng bcrypt - sau khi đã valid data thành công
-      dataRegister.password = bcrypt.hashSync(req.body.password.trim(), 12);
+      dataRegister.password = await bcrypt.hash(req.body.password.trim(), 12);
 
       //4.thêm data vào database
       const createUser = new User(dataRegister);
@@ -73,17 +73,17 @@ const userController = {
       }
 
       //2.tìm Email có tồn tại chưa
-      const userCurrent = await User.find({ email: dataLogin.email });
+      const userCurrent = await User.findOne({ email: dataLogin.email });
 
       //nếu chưa có - nhập sai email
-      if (!userCurrent.length) {
+      if (!userCurrent) {
         return res.status(400).json({ message: "Email is not correct!" });
       }
 
       //nếu có thì kiểm tra pass - dùng compare.bcrypt
-      const isValid = bcrypt.compareSync(
+      const isValid = await bcrypt.compare(
         dataLogin.password,
-        userCurrent[0].password
+        userCurrent.password
       );
       //pass không đúng
       if (!isValid) {
@@ -92,7 +92,8 @@ const userController = {
 
       /////////VALID DONE ///////////
       //lấy data user ngoại trừ password
-      const { password, ...Others } = userCurrent[0]._doc;
+
+      const { password, ...Others } = userCurrent._doc;
 
       //tạo ACCESS_TOKEN cấp quyền user
       const USER_ACCESS_TOKEN = jwt.sign(
@@ -100,6 +101,7 @@ const userController = {
         process.env.SECRET_KEY_JWT,
         { expiresIn: 60 * 60 }
       );
+      console.log("!1");
 
       //data response gồm token và thông tin user ngoại trừ pass
       const returnData = {
@@ -148,17 +150,17 @@ const userController = {
       }
 
       //2.tìm Email có tồn tại chưa
-      const userCurrent = await User.find({ email: dataLogin.email });
+      const userCurrent = await User.findOne({ email: dataLogin.email });
 
       //nếu chưa có - nhập sai email
-      if (!userCurrent.length) {
+      if (!userCurrent) {
         return res.status(400).json({ message: "Email is not correct!" });
       }
 
       //nếu có thì kiểm tra pass - dùng compare.bcrypt
-      const isValid = bcrypt.compareSync(
+      const isValid = await bcrypt.compare(
         dataLogin.password,
-        userCurrent[0].password
+        userCurrent.password
       );
       //pass không đúng
       if (!isValid) {
@@ -166,13 +168,13 @@ const userController = {
       }
 
       //check xem role hiện tại có phải "admin" hoặc "mod" không
-      if (userCurrent[0].role !== "ADMIN" && userCurrent[0].role !== "MOD") {
+      if (userCurrent.role !== "ADMIN" && userCurrent.role !== "MOD") {
         return res.status(401).json({ message: "Account not permission!" });
       }
 
       /////////VALID DONE ///////////
       //lấy data user ngoại trừ password
-      const { password, ...Others } = userCurrent[0]._doc;
+      const { password, ...Others } = userCurrent._doc;
 
       //tạo ACCESS_TOKEN cấp quyền user
       const USER_ACCESS_TOKEN = jwt.sign(
