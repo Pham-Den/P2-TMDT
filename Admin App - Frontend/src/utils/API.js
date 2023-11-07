@@ -1,5 +1,5 @@
-const URL_Server = "http://localhost:5050";
-// const URL_Server = "https://p2-tmdt.managestore.io.vn";
+// const URL_Server = "http://localhost:5050";
+const URL_Server = "https://p2-tmdt.managestore.io.vn";
 
 const ApiProduct = {
   apiAllProduct: `${URL_Server}/api/product/allproduct`,
